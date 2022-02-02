@@ -23,22 +23,20 @@ const Home = ({user}) => {
         }
     }
 
-    const handleUpload = () => {
-        const storage = getStorage()
-        const storageRef = ref(storage, `/images/${image?.name}`)
-        uploadBytes(storageRef, image).then(e => {console.log('uploaded', e)})
-        loadImages()
-
+    const handleUpload = async () => {
+        const storage = await getStorage()
+        const storageRef = await ref(storage, `/images/${image?.name}`)
+        await uploadBytes(storageRef, image)
+        const url = await getDownloadURL(ref(storage, `images/${image?.name}`))
+        setUrls((prev) => [url, ...prev])
     }
     const loadImages = () => {
-        console.log('loading')
         const storage = getStorage()
         const listRef = ref(storage, '/images')
 
         listAll(listRef).then((res) => {
 
             res.items.forEach( async (item) => {
-                console.log(item)
                 if (!endsWithListItem(item._location.path, ['png', 'jpg', 'gif'])){return}
                 const url = await getDownloadURL(ref(storage, item._location.path));
                 await setUrls((prev) => {
@@ -48,7 +46,6 @@ const Home = ({user}) => {
                         return [...prev]
                     }
                 })
-                await console.log(url)
             });
         })
     }
