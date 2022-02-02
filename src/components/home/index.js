@@ -6,7 +6,6 @@ import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from "firebase/
 import { useEffect, useState } from 'react'
 
 const Home = ({user}) => {
-    const imageFileTypes = ['png', 'jpg', 'gif']
     const [image, setImage] = useState(null);
     const [urls, setUrls] = useState([])
     const endsWithListItem = (str, li) => {
@@ -24,11 +23,13 @@ const Home = ({user}) => {
     }
 
     const handleUpload = async () => {
+        if (!image.type.startsWith('image/')){return}
         const storage = await getStorage()
         const storageRef = await ref(storage, `/images/${image?.name}`)
         await uploadBytes(storageRef, image)
         const url = await getDownloadURL(ref(storage, `images/${image?.name}`))
         setUrls((prev) => [url, ...prev])
+
     }
     const loadImages = () => {
         const storage = getStorage()
@@ -61,10 +62,14 @@ const Home = ({user}) => {
             <div className='homePage'>
                 <h1>The site is loaded. You can now edit the home page or add other components</h1>
                 {user?<h2 style={{textAlign: 'center'}}>Welcome, {user}</h2>:null}
-                <input type="file" onChange={handleChange}/>
+                <Form.Group controlId="formFileLg" className="mb-3">
+                    <Form.Label>Upload a photo</Form.Label>
+                    <Form.Control type="file" size="lg" onChange={handleChange}/>
+                </Form.Group>
                 <Button onClick={handleUpload}>Upload Image</Button>{' '}
-                {/* <Button onClick={getFiles}>Get Files</Button> */}
-                {urls.map((url) => <img src={url}></img>)}
+                <div className='photosDiv'>
+                    {urls.map((url) => <img src={url}></img>)}
+                </div>
 
             </div>
         </>
